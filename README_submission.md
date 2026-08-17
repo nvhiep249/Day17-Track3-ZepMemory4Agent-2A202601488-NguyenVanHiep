@@ -1,5 +1,9 @@
 # README Submission - Lab 17 (Zep Memory Agent)
 
+**Họ và tên:** Nguyễn Văn Hiệp  
+**MSV:** 2A202601488
+
+
 ## 1. Phân tích Benchmark (4 câu)
 
 **1. Layer nào có hit rate thấp nhất? Có cơ sở không?**
@@ -33,22 +37,29 @@
 
 ---
 
-## 3. Ảnh minh chứng
+## 3. Nhận xét về Recency và Compaction (Bonus)
+
+* **E08 Recency:** Agent lấy thông tin mới nhất (BLUEBIRD-42, TypeScript) thay vì thông tin cũ, cho thấy tính năng thay thế (decay) hoạt động tốt.
+* **E10 Compaction:** Dù raw data đã rơi khỏi short-term window, nhưng `durable note` vẫn giữ được deadline `16:00` nhờ việc tóm tắt hiệu quả.
+
+---
+
+## 4. Ảnh minh chứng
 
 *Học viên chèn screenshot bên dưới thay thế cho thẻ `<img ...>`*
 
 **1. Long-Term Memory (E02/E03/E08/E09 PASS)**
 <!-- Thay the bang screenshot cua ban -->
-`[Placeholder: Screenshot benchmark ket qua nhom Long-Term PASS]`
+![Long-Term](./images/Long-Term.png)
 
 **2. Episodic Memory (E04/E05 PASS)**
 <!-- Thay the bang screenshot cua ban -->
-`[Placeholder: Screenshot benchmark ket qua nhom Episodic PASS]`
+![Episodic](./images/episodic.png)
 
 **3. Semantic Memory (E06/E11 PASS)**
 <!-- Thay the bang screenshot cua ban -->
-`[Placeholder: Screenshot benchmark ket qua nhom Semantic PASS]`
+![Semantic](./images/semantic.png)
 
 **4. Privacy (Forget + Verify-only)**
 <!-- Thay the bang screenshot cua ban -->
-`[Placeholder: Screenshot hien thi terminal Zep user absent: True & Redis user keys remaining: 0]`
+![Privacy](./images/privacy.png)
