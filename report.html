@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Logic Code - Multi-Memory Agent (Zep)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #cbd5e1;
+            --card-bg: #1e293b;
+            --primary-color: #38bdf8;
+            --accent-color: #818cf8;
+            --border-color: #334155;
+            --success-color: #10b981;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        h2 {
+            color: #ffffff;
+            font-size: 1.8rem;
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-top: 25px;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: var(--accent-color);
+        }
+        
+        .task-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        pre {
+            background-color: #0b1120;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            color: #fb7185;
+            background-color: rgba(251, 113, 133, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Báo Cáo Logic Code</h1>
+            <p>Hệ thống Multi-Memory Agent sử dụng Zep Cloud V3</p>
+        </header>
+
+        <div class="card">
+            <span class="task-badge">Task 1/4</span>
+            <h2>Long-Term Memory (Declarative)</h2>
+            <p><strong>Mục tiêu:</strong> Truy xuất context, preferences và facts (thông tin dài hạn) của user, phục vụ cross-session recall và user isolation.</p>
+            
+            <h3>Logic Code:</h3>
+            <pre>
+def retrieve_long_term(self, user_id: str, thread_id: str, query: str) -> str:
+    prime_eval_thread(self.client, user_id, thread_id, query)
+    
+    context_res = ""
+    context = self.client.thread.get_user_context(thread_id=thread_id)
+    if context and context.context:
+        context_res = str(context.context)
+        
+    try:
+        results = self.client.graph.search(
+            user_id=user_id,
+            query=cap_query(query),
+            scope="edges",
+            limit=20
+        )
+        edges_res = render_graph_search(results)
+    except Exception:
+        edges_res = ""
+        
+    return join_nonempty([context_res, edges_res])
+            </pre>
+            
+            <h3>Giải thích:</h3>
+            <ul>
+                <li><strong>Context Block:</strong> Sử dụng <code>get_user_context</code> để lấy Context Block do Zep tổng hợp (chứa User Summary và Facts) dựa trên relevance của thread. Đây là bộ nhớ cốt lõi mang tính tóm tắt dài hạn.</li>
+                <li><strong>User Isolation:</strong> Mọi truy vấn đều phải map qua <code>thread_id</code> (gắn với <code>user_id</code>), đảm bảo Agent không bị rò rỉ (leak) dữ liệu từ người dùng khác (privacy).</li>
+                <li><strong>Recency:</strong> Context Block của Zep tự động xử lý recency (tính mới) cho các facts (ví dụ user đổi từ Python sang TypeScript) giúp thu thập thông tin nhất quán và cập nhật.</li>
+                <li><strong>Edges Search:</strong> Tìm kiếm thêm các quan hệ (edges) với limit cao (=20) vì các task/open loops (deadline) đôi khi không lọt vào context block tóm tắt mà nằm rải rác dưới dạng node/edge.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <span class="task-badge">Task 2/4</span>
+            <h2>Episodic Memory (Trải nghiệm)</h2>
+            <p><strong>Mục tiêu:</strong> Truy xuất lại những "trải nghiệm" (episodes) trong quá khứ của người dùng để trả lời cho dạng câu hỏi: "Lần trước tôi làm gì để giải quyết vấn đề?".</p>
+            
+            <h3>Logic Code:</h3>
+            <pre>
+def retrieve_episodic(self, user_id: str, query: str) -> str:
+    results = self.client.graph.search(
+        user_id=user_id,
+        query=cap_query(query),
+        scope="episodes",
+        limit=5
+    )
+    return render_graph_search(results, episode_char_cap=200)
+            </pre>
+            
+            <h3>Giải thích:</h3>
+            <ul>
+                <li><strong>Scope:</strong> Tìm kiếm bằng <code>scope="episodes"</code> để truy cập lại raw messages/documents (các trajectory đã lưu) với đầy đủ context thực tế lúc xảy ra.</li>
+                <li><strong>Limit & Capping:</strong> Đặt <code>limit=5</code> và <code>episode_char_cap=200</code> để tránh tình trạng tràn bộ nhớ do một message quá dài (verbose) có thể đẩy các reflections quan trọng ra khỏi token budget (3%).</li>
+                <li><strong>Provenance:</strong> Đảm bảo Agent có bằng chứng rõ ràng (provenance) để tự tin trả lời thay vì ảo giác (hallucination) dựa trên kiến thức base model.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <span class="task-badge">Task 3/4</span>
+            <h2>Semantic Memory (Tri thức Domain)</h2>
+            <p><strong>Mục tiêu:</strong> Truy xuất các thông tin, quy tắc chung của hệ thống không phụ thuộc vào cá nhân (ví dụ: tài liệu API, rule thanh toán).</p>
+            
+            <h3>Logic Code:</h3>
+            <pre>
+def retrieve_semantic(self, graph_id: str, query: str) -> str:
+    capped_query = cap_query(query)
+    chunks = []
+    try:
+        results = self.client.graph.search(
+            graph_id=graph_id,
+            query=capped_query,
+            scope="episodes",
+            limit=8
+        )
+        seen = set()
+        for ep in getattr(results, "episodes", []) or []:
+            content = getattr(ep, "content", "")
+            if not content: continue
+            
+            # Khử trùng lặp giữa bản ghi JSON và Text
+            if content.strip().startswith('{"id":'):
+                try:
+                    obj = json.loads(content)
+                    content = obj.get("summary", content)
+                except Exception:
+                    pass
+            if content not in seen:
+                seen.add(content)
+                chunks.append(f"EPISODE: {content}")
+    except Exception:
+        pass
+        
+    try:
+        results = self.client.graph.search(
+            graph_id=graph_id, query=capped_query, scope="nodes", limit=3
+        )
+        chunks.append(render_graph_search(results))
+    except Exception:
+        pass
+        
+    return join_nonempty(chunks)
+            </pre>
+            
+            <h3>Giải thích:</h3>
+            <ul>
+                <li><strong>Standalone Graph:</strong> Tìm kiếm trên một knowledge graph độc lập (<code>graph_id</code>) thay vì <code>user_id</code> để khai thác tri thức chung toàn domain.</li>
+                <li><strong>Giữ Literal Markers:</strong> Ưu tiên <code>scope="episodes"</code> thay vì "auto" vì Zep's entity extractor thường lược bỏ đi các mã code nguyên bản (ví dụ PAYMENT-RULE-3, BUDGET-10-4-3-3) mà lab cần.</li>
+                <li><strong>Tối ưu Budget (Deduplication):</strong> Dữ liệu knowledge base được đẩy vào Zep dưới dạng 2 kiểu payload: JSON và Text. Đoạn mã trên nhận diện JSON và trích xuất trường summary, sau đó khử trùng lặp (set seen) để tránh lãng phí token budget (cực kỳ nhạy cảm cho semantic ở mức 3%), giúp lấy đủ tài liệu mà không bị cắt xén đoạn chứa marker.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <span class="task-badge">Task 4/4</span>
+            <h2>Assemble Context (Router & Budget)</h2>
+            <p><strong>Mục tiêu:</strong> Tổng hợp và cắt xén context từ 4 layer sao cho phù hợp với ngân sách token và thứ tự ưu tiên nhằm đem lại ngữ cảnh sạch, đầy đủ nhất cho LLM.</p>
+            
+            <h3>Logic Code:</h3>
+            <pre>
+def assemble_context(self, layers: dict[str, str]) -> tuple[str, dict[str, dict[str, int]]]:
+    # Sử dụng ContextBudgetManager (10/4/3/3 budget and priority order)
+    return self.budget.assemble(layers)
+            </pre>
+            
+            <h3>Giải thích:</h3>
+            <ul>
+                <li><strong>Token Budgeting:</strong> Cắt tỉa (trimming) text của từng layer theo ngân sách cho phép (Short-term: 10%, Long-term: 4%, Episodic: 3%, Semantic: 3%).</li>
+                <li><strong>Thứ tự ưu tiên (Priority):</strong> Agent nhận context theo trình tự hợp lý từ gần đến xa, từ cá nhân đến chung: 
+                    <br>1. <span class="highlight">Short-term</span> (cuộc trò chuyện hiện tại) 
+                    <br>2. <span class="highlight">Long-term</span> (thói quen, fact cá nhân) 
+                    <br>3. <span class="highlight">Episodic</span> (trải nghiệm quá khứ) 
+                    <br>4. <span class="highlight">Semantic</span> (kiến thức chung).
+                </li>
+                <li><strong>Ngăn chặn tràn bộ nhớ (Context Overflow):</strong> Các bộ nhớ phụ (như semantic/episodic) bị cắt xén từ dưới lên nếu vượt budget, đảm bảo không đẩy các token quan trọng nhất (short-term & long-term) ra khỏi cửa sổ ngữ cảnh.</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>Generated by Antigravity AI - VinUni Codelab 2026</p>
+        </div>
+    </div>
+</body>
+</html>
